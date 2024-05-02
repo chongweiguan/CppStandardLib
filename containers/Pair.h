@@ -1,3 +1,5 @@
+
+
 template <typename T, typename U>
 class Pair {
 public:
@@ -14,8 +16,47 @@ public:
 
     ~Pair() = default;
 
-    bool operator<(const Pair& other) const {
-        if (other.first == first) return second < other.second;
-        return first < other.first;
-    }
+    template<typename V, typename W>
+    friend bool operator<(const Pair<V,W>& p1, const Pair<V,W>& p2);
+
+    template<typename V, typename W>
+    friend bool operator<=(const Pair<V,W>& p1, const Pair<V,W>& p2);
+
+    template<typename V, typename W>
+    friend bool operator>(const Pair<V,W>& p1, const Pair<V,W>& p2);
+
+    template<typename V, typename W>
+    friend bool operator>=(const Pair<V,W>& p1, const Pair<V,W>& p2);
+
+    template<typename V, typename W>
+    friend bool operator==(const Pair<V,W>& p1, const Pair<V,W>& p2);
 };
+
+template<typename T, typename U>
+bool operator<(const Pair<T,U>& p1, const Pair<T,U>& p2) {
+    if (p1.first == p2.first) return p1.second < p2.second;
+    return p1.first < p2.first;
+}
+
+template<typename T, typename U>
+bool operator<=(const Pair<T,U>& p1, const Pair<T,U>& p2) {
+    if (p1.first == p2.first) return p1.second <= p2.second;
+    return p1.first <= p2.first;
+}
+
+template<typename T, typename U>
+bool operator>(const Pair<T,U>& p1, const Pair<T,U>& p2) {
+    if (p1.first == p2.first) return p1.second > p2.second;
+    return p1.first > p2.first;
+}
+
+template<typename T, typename U>
+bool operator>=(const Pair<T,U>& p1, const Pair<T,U>& p2) {
+    if (p1.first == p2.first) return p1.second >= p2.second;
+    return p1.first >= p2.first;
+}
+
+template<typename T, typename U>
+bool operator==(const Pair<T,U>& p1, const Pair<T,U>& p2) {
+    return p1.first == p2.first && p1.second == p2.second;
+}

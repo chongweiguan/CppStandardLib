@@ -1,3 +1,5 @@
+#pragma once
+
 #include <initializer_list>
 #include <iterator>
 
@@ -51,13 +53,13 @@ public:
 
     // Access specified element with bounds checking
     T& at(int index) {
-        if (list.size() > N) throw std::out_of_range("Initializer list too large");
+        if (index >= N || index < 0) throw std::out_of_range("Invalid index");
         return t_array[index];
     }
 
     // Access const specified element with bounds checking
     const T& at(int index) const {
-        if (list.size() > N) throw std::out_of_range("Initializer list too large");
+        if (index >= N || index < 0) throw std::out_of_range("Invalid index");
         return t_array[index];
     }
 
@@ -142,4 +144,53 @@ public:
             t_array[i] = t;
         }
     }
+
+    template<typename V, size_t S>
+    friend bool operator<(const Array<V,S>& a1, const Array<V,S>& a2);
+
+    template<typename V, size_t S>
+    friend bool operator<=(const Array<V,S>& a1, const Array<V,S>& a2);
+
+    template<typename V, size_t S>
+    friend bool operator>(const Array<V,S>& a1, const Array<V,S>& a2);
+
+    template<typename V, size_t S>
+    friend bool operator>=(const Array<V,S>& a1, const Array<V,S>& a2);
+
+    template<typename V, size_t S>
+    friend bool operator==(const Array<V,S>& a1, const Array<V,S>& a2);
 };
+
+template<typename V, size_t S>
+bool operator<(const Array<V,S>& a1, const Array<V,S>& a2) {
+    for (int i = 0; i < S; ++i) {
+        if (a1[i] >= a2[i]) return false;
+    }
+    return true;
+}
+
+template<typename V, size_t S>
+bool operator<=(const Array<V,S>& a1, const Array<V,S>& a2) {
+    for (int i = 0; i < S; ++i) {
+        if (a1[i] > a2[i]) return false;
+    }
+    return true;
+}
+
+template<typename V, size_t S>
+bool operator>(const Array<V,S>& a1, const Array<V,S>& a2) {
+    return !(a1 <= a2);
+}
+
+template<typename V, size_t S>
+bool operator>=(const Array<V,S>& a1, const Array<V,S>& a2) {
+    return !(a1 < a2);
+}
+
+template<typename V, size_t S>
+bool operator==(const Array<V,S>& a1, const Array<V,S>& a2) {
+    for (int i = 0; i < S; ++i) {
+        if (a1[i] != a2[i]) return false;
+    }
+    return true;
+}
