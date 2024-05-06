@@ -6,31 +6,23 @@
 template<typename T, size_t N>
 class Array {
 private:
-    T* _data;
+    T _data[N];
 
 public:
     // default constructor
-    Array() {
-        if (N > max_size()) throw std::range_error("N is too large");
-        _data = new T[N];
-    }
+    Array() = default;
 
     // Constructor using initializer_list
     Array(std::initializer_list<T> list) {
-        if (N > max_size()) throw std::range_error("size is too large");
         if (list.size() > N) throw std::out_of_range("Initializer list too large");
-        _data = new T[N];
         std::copy(list.begin(), list.end(), _data);
     }
 
     // default destructor
-    ~Array() {
-        delete[] _data;
-    }
+    ~Array() = default;
 
     // Copy constructor
     Array(const Array& other) {
-        _data = new T[N];
         for (int i = 0; i < N; ++i) {
             _data[i] = other[i];
         }
@@ -46,19 +38,15 @@ public:
     }
 
     Array(Array&& other) {
-        _data = new T[N];
         for (int i = 0; i < N; ++i) {
             _data[i] = other[i];
         }
 
     }
     Array& operator=(Array&& other) {
-        T* _newData = new T[N];
         for (int i = 0; i < N; ++i) {
-            _newData[i] = other[i];
+            _data[i] = other[i];
         }
-        delete[] _data;
-        _data = _newData;
         return *this;
     }
 
@@ -184,6 +172,9 @@ public:
 
     template<typename V, size_t S>
     friend bool operator==(const Array<V,S>& a1, const Array<V,S>& a2);
+
+    template<typename V, size_t S>
+    friend bool operator!=(const Array<V,S>& a1, const Array<V,S>& a2);
 };
 
 template<typename V, size_t S>
@@ -218,4 +209,9 @@ bool operator==(const Array<V,S>& a1, const Array<V,S>& a2) {
         if (a1[i] != a2[i]) return false;
     }
     return true;
+}
+
+template<typename V, size_t S>
+bool operator!=(const Array<V,S>& a1, const Array<V,S>& a2) {
+    return !(a1 == a2);
 }

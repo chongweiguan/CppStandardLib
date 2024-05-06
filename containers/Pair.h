@@ -32,6 +32,9 @@ public:
     friend bool operator==(const Pair<V,W>& p1, const Pair<V,W>& p2);
 
     template<typename V, typename W>
+    friend bool operator!=(const Pair<V,W>& p1, const Pair<V,W>& p2);
+
+    template<typename V, typename W>
     friend std::ostream& operator<<(std::ostream& out, const Pair<V,W>& p);
 };
 
@@ -62,6 +65,11 @@ bool operator>=(const Pair<T,U>& p1, const Pair<T,U>& p2) {
 template<typename T, typename U>
 bool operator==(const Pair<T,U>& p1, const Pair<T,U>& p2) {
     return p1.first == p2.first && p1.second == p2.second;
+}
+
+template<typename T, typename U>
+bool operator!=(const Pair<T,U>& p1, const Pair<T,U>& p2) {
+    return !(p1 == p2);
 }
 
 template<typename T, typename U>

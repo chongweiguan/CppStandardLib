@@ -9,6 +9,17 @@ private:
     size_t _capacity;
     size_t _size;
 
+void reallocate() {
+    _capacity *= 2;
+    T* newData = new T[_capacity];
+    for (int i = 0; i < _size; ++i) {
+        newData[i] = _data[i];
+    }
+    delete[] _data;
+    _data = newData;
+    return;
+}
+
 public:
     // Default constructor
     Vector() = default;
@@ -236,16 +247,9 @@ public:
 
     void push_back(T t) {
         if (_size == _capacity) {
-            _capacity *= 2;
-            T* newData = new T[_capacity];
-            for (int i = 0; i < _size; ++i) {
-                newData[i] = _data[i];
-            }
-            delete[] _data;
-            _data = newData;
+            reallocate();
         }
-        _data[_size] = t;
-        ++_size;
+        _data[_size++] = t;
     }
 
     void pop_back() {
@@ -288,13 +292,85 @@ public:
         return p_start;
     }
 
-    template<typename... Args>
-    T* emplace(T* ptr, Args&&... args) {
-        return ptr;
-    }
 
     template<typename... Args>
-    void emplace_back(T* ptr, Args&&... args) {
+    T* emplace(T* insert, Args&&... args) {
+        T t(std::forward<Args>(args)...);
+        T* shift = end();
+        while (shift != insert) {
+            *shift = *(shift-1);
+            --shift;
+        }
+        *insert = t;
+        return insert;
+    }
+
+
+    template<typename... Args>
+    void emplace_back(Args&&... args) {
+        if (_size == _capacity) {
+            reallocate();
+        }
+        T t(std::forward<Args>(args)...);
+        _data[_size++] = t;
         return;
     }
+
+    template<typename V>
+    friend bool operator==(const Vector<V>& v1, const Vector<V>& v2); 
+
+    template<typename V>
+    friend bool operator!=(const Vector<V>& v1, const Vector<V>& v2); 
+
+    template<typename V>
+    friend bool operator<(const Vector<V>& v1, const Vector<V>& v2);
+
+    template<typename V>
+    friend bool operator<=(const Vector<V>& v1, const Vector<V>& v2);
+
+    template<typename V>
+    friend bool operator>(const Vector<V>& v1, const Vector<V>& v2);
+
+    template<typename V>
+    friend bool operator>=(const Vector<V>& v1, const Vector<V>& v2);
 };
+
+template<typename V>
+bool operator==(const Vector<V>& v1, const Vector<V>& v2) {
+    if (v1.size() != v2.size()) return false;
+    int n = v2.size();
+    for (int i = 0; i < n; ++i) {
+        if (v1[i] != v2[i]) return false;
+    }
+    return true;
+}
+
+template<typename V>
+bool operator!=(const Vector<V>& v1, const Vector<V>& v2) {
+    return !(v1 == v2);
+}
+
+template<typename V>
+bool operator<(const Vector<V>& v1, const Vector<V>& v2) {
+    if (v1.size() < v2.size()) return true;
+    int n = v1.size();
+    for (int i = 0; i < n; ++i) {
+        if (v1[i] >= v2[i]) return false;
+    }
+    return true;
+}
+
+template<typename V>
+bool operator>(const Vector<V>& v1, const Vector<V>& v2) {
+    return !(v1 < v2) && !(v1 == v2);
+}
+
+template<typename V>
+bool operator<=(const Vector<V>& v1, const Vector<V>& v2) {
+    return (v1 == v2) || (v1 < v2);
+}
+
+template<typename V>
+bool operator>=(const Vector<V>& v1, const Vector<V>& v2) {
+    return (v1 == v2) || !(v1 < v2);
+}
