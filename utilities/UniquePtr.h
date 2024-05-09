@@ -4,19 +4,24 @@ private:
     T* resource;
 
 public:
-    UniquePtr(T* resource) : resource(resource) {}
+    UniquePtr(T* t) {
+        resource = t;
+    }
 
-    UniquePtr(UniquePtr&& other) {
-        resource = other.resource;
+    UniquePtr(UniquePtr&& other) : resource(other.resource) {
         other.resource = nullptr;
     }
 
     UniquePtr& operator=(UniquePtr&& other) {
-        resource = other.resource;
-        other.resource = nullptr;
+        if (this != &other) {
+            delete resource;
+            resource = other.resource;
+            other.resource = nullptr;
+        }
+        return *this;
     }
 
-    ~UniquePtr() { 
+    ~UniquePtr() {
         delete resource;
     }
 
@@ -39,11 +44,85 @@ public:
         return resource;
     }
 
-    T operator*() {
+    T& operator*() {
         return *resource;
     }
 
-    const T operator*() const{
+    const T& operator*() const{
         return *resource;
     }
+
+    explicit operator bool() const {
+        return resource != nullptr;
+    }
+
+    T* release() {
+        T* res = resource;
+        resource = nullptr;
+
+        return res;
+    }
+
+    void reset(T* newResource = nullptr) {
+        delete resource;
+        resource = newResource;
+    }
+
+    template<typename U>
+    friend void swap(UniquePtr<U>& ptr1, UniquePtr<U>& ptr2) noexcept;
+
+    template<typename V>
+    friend bool operator==(const UniquePtr<V>& v1, const UniquePtr<V>& v2); 
+
+    template<typename V>
+    friend bool operator!=(const UniquePtr<V>& v1, const UniquePtr<V>& v2); 
+
+    template<typename V>
+    friend bool operator<(const UniquePtr<V>& v1, const UniquePtr<V>& v2);
+
+    template<typename V>
+    friend bool operator<=(const UniquePtr<V>& v1, const UniquePtr<V>& v2);
+
+    template<typename V>
+    friend bool operator>(const UniquePtr<V>& v1, const UniquePtr<V>& v2);
+
+    template<typename V>
+    friend bool operator>=(const UniquePtr<V>& v1, const UniquePtr<V>& v2);
 };
+
+template<typename U>
+void swap(UniquePtr<U>& ptr1, UniquePtr<U>& ptr2) noexcept {
+    U* temp = ptr1.resource;
+    ptr1.resource = ptr2.resource;
+    ptr2.resource = temp;
+}
+
+template<typename V>
+bool operator>=(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
+    return *v1 >= *v2;
+}
+
+template<typename V>
+bool operator==(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
+    return *v1 == *v2;
+}
+
+template<typename V>
+bool operator>(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
+    return *v1 > *v2;
+}
+
+template<typename V>
+bool operator<=(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
+    return *v1 <= *v2;
+}
+
+template<typename V>
+bool operator<(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
+    return *v1 < *v2;
+}
+
+template<typename V>
+bool operator!=(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
+    return *v1 != *v2;
+}
