@@ -4,9 +4,10 @@ private:
     T* resource;
 
 public:
-    UniquePtr(T* t) {
-        resource = t;
-    }
+
+    UniquePtr() : resource(nullptr) {};
+
+    UniquePtr(T* t) : resource(t) {}
 
     UniquePtr(UniquePtr&& other) : resource(other.resource) {
         other.resource = nullptr;
@@ -126,3 +127,9 @@ template<typename V>
 bool operator!=(const UniquePtr<V>& v1, const UniquePtr<V>& v2) {
     return *v1 != *v2;
 }
+
+template<typename V, typename... Args>
+auto make_unique(Args&&... args) {
+    V* t = new V(std::forward<Args>(args)...);
+    return UniquePtr<V>(t);
+};
