@@ -69,6 +69,12 @@ public:
         resource = newResource;
     }
 
+    void swap(UniquePtr& uptr) {
+        T* temp = uptr.resource;
+        uptr.resource = resource;
+        resource = temp;
+    }    
+
     template<typename U>
     friend void swap(UniquePtr<U>& ptr1, UniquePtr<U>& ptr2) noexcept;
 
