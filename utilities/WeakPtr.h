@@ -4,48 +4,61 @@
 template<typename T>
 class WeakPtr {
 private:
-    SharedPtr<T>* m_ptr;
+    T* resource;
+    int* count;
 
 public:
-    WeakPtr() : m_ptr(nullptr) {}
-
-    WeakPtr(SharedPtr<T>& shared_ptr) : m_ptr(&shared_ptr) {}
-
-    WeakPtr(WeakPtr& weak_ptr) : m_ptr(weak_ptr.m_ptr) {}
+    WeakPtr() : resource(nullptr), count(nullptr) {}
+    WeakPtr(const SharedPtr<T>& shared_ptr) : resource(shared_ptr.resource), count(shared_ptr.count) {}
+    WeakPtr(const WeakPtr& weak_ptr) : resource(weak_ptr.resource), count(weak_ptr.count) {}
     ~WeakPtr() {}
 
     WeakPtr& operator=(const WeakPtr& weak_ptr) {
-        if (this == &weak_ptr || weak_ptr.m_ptr == m_ptr) return *this;
-        m_ptr = weak_ptr.m_ptr;
+        if (this == &weak_ptr || weak_ptr.resource == resource) return *this;
+        resource = weak_ptr.resource;
+        count = weak_ptr.count;
         return *this;
     }
 
     WeakPtr& operator=(const SharedPtr<T>& shared_ptr) {
-        if (m_ptr != &shared_ptr) {
-            m_ptr = &shared_ptr;
-        }
+        if (resource == shared_ptr.resource) return *this;
+        resource = shared_ptr.resource;
+        count = shared_ptr.count;
         return *this;
     }
 
     void swap(WeakPtr& other) noexcept {
-        SharedPtr<T>* temp = m_ptr;
-        m_ptr = other.m_ptr;
-        other.m_ptr = temp;
+        if (resource != other.resource) {
+            T* temp = resource;
+            int* tempCount = count;
+
+            resource = other.resource;
+            count = other.count;
+
+            other.resource = temp;
+            other.count = tempCount;
+        }
     }
 
     void reset() noexcept {
-        m_ptr = nullptr;
+        resource = nullptr;
+        count = nullptr;
     }
 
     int use_count() const noexcept {
-        return m_ptr->use_count();
+        if (count == nullptr) return 0;
+        return *count;
     }
 
     bool expired() const noexcept {
-        return m_ptr == nullptr || m_ptr->use_count() == 0;
+        return use_count() == 0;
     }
 
-    SharedPtr<T>& lock() {
-        return *m_ptr;
+    SharedPtr<T> lock() {
+        SharedPtr<T> shared_ptr;
+        shared_ptr.resource = resource;
+        shared_ptr.count = count;
+        ++*count;
+        return shared_ptr;
     }
 };

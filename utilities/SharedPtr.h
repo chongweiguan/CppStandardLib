@@ -2,12 +2,17 @@
 #include <iostream>
 
 template<typename T>
+class WeakPtr;
+
+template<typename T>
 class SharedPtr {
 private:
     T* resource;
     int* count;
 
 public:
+    friend class WeakPtr<T>;
+
     SharedPtr() : resource{nullptr}, count{new int(0)} {}
 
     SharedPtr(T* resource) : resource(resource), count(new int(1)) {}
@@ -41,15 +46,18 @@ public:
     }
 
     SharedPtr& operator=(SharedPtr&& sharedPtr) {
-        --*count;
-        if (*count <= 0) {
-            if (resource != nullptr) delete resource;
-            delete count;
+        if (this != &sharedPtr) {
+
+            if (--*count <= 0) {
+                if (resource != nullptr) delete resource;
+                delete count;
+            }
+
+            resource = sharedPtr.resource;
+            count = sharedPtr.count;
+            sharedPtr.resource = nullptr;
+            sharedPtr.count = new int(0);
         }
-        resource = sharedPtr.resource;
-        count = sharedPtr.count;
-        sharedPtr.resource = nullptr;
-        sharedPtr.count = new int(0);
         return *this;
     }
 
@@ -100,8 +108,16 @@ public:
 
     void reset(T* newResource = nullptr) {
         --*count;
-        if (*count == 0) delete resource;
+        if (*count == 0) {
+            if (resource != nullptr) delete resource;
+            delete count;
+        }
         resource = newResource;
+        if (newResource) {
+            count = new int(1);  // Reset the count for the new resource
+        } else {
+            count = new int(0);
+        }
     }
 
     int use_count() {
@@ -140,14 +156,14 @@ public:
 
 template<typename U>
 void swap(SharedPtr<U> ptr1, SharedPtr<U> ptr2) noexcept {
-    if (ptr1.resouce != ptr2.resouce) {
+    if (ptr1.resource != ptr2.resource) {
         U* temp = ptr1.resource;
         U* tempCount = ptr1.count;
 
-        ptr1.resouce = ptr2.resouce;
+        ptr1.resource = ptr2.resource;
         ptr1.count = ptr2.count;
 
-        ptr2.resouce = temp;
+        ptr2.resource = temp;
         ptr2.count = tempCount;
     }
 }
