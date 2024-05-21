@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 template<typename T>
@@ -21,7 +22,7 @@ public:
         if (this != &sharedPtr && sharedPtr.resource != resource) {
             --*count;
             if (*count <= 0) {
-                delete resource;
+                if (resource != nullptr) delete resource;
                 delete count;
             }
 
@@ -32,10 +33,30 @@ public:
         return *this;
     }
 
+    SharedPtr(SharedPtr&& sharedPtr) {
+        resource = sharedPtr.resource;
+        count = sharedPtr.count;
+        sharedPtr.resource = nullptr;
+        sharedPtr.count = new int(0);
+    }
+
+    SharedPtr& operator=(SharedPtr&& sharedPtr) {
+        --*count;
+        if (*count <= 0) {
+            if (resource != nullptr) delete resource;
+            delete count;
+        }
+        resource = sharedPtr.resource;
+        count = sharedPtr.count;
+        sharedPtr.resource = nullptr;
+        sharedPtr.count = new int(0);
+        return *this;
+    }
+
     ~SharedPtr() {
         --*count;
-        if (*count == 0) {
-            delete resource;
+        if (*count <= 0) {
+            if (resource != nullptr) delete resource;
             delete count;
         }
     }
@@ -92,7 +113,6 @@ public:
     }
 
     explicit operator bool() const {
-        std::cout << "hello?";
         return resource != nullptr;
     }
 
