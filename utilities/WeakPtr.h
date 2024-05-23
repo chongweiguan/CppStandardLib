@@ -62,3 +62,14 @@ public:
         return shared_ptr;
     }
 };
+
+template<typename T>
+void swap(WeakPtr<T>& wp1, WeakPtr<T>& wp2) {
+    if (wp1.resource != wp2.resource) {
+        T* tempR = wp1.resource;
+        int* tempC = wp1.count;
+
+        wp1.resource = wp2.resource;
+        wp1.count = wp1.count;
+    }
+}
