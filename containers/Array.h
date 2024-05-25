@@ -148,7 +148,7 @@ public:
 
     // returns the maximum possible number of elements
     size_t max_size() const {
-        return N;
+        return std::numeric_limits<size_t>::max() / sizeof(T);
     }
 
     // fills the container with specified value
